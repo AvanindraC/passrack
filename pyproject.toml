@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pmcli"
-version = "0.1.0"
+version = "0.1.2"
 description = "A Command Line Interface to encrypt, decrypt and save passwords"
 authors = ["Avanindra Chakraborty <avanindra.d2.chakraborty@gmail.com>"]
 license = "MIT"
