@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "pmcli"
+version = "0.1.7"
+description = "A Command Line Interface to encrypt, decrypt and save passwords dor windows"
+authors = ["Avanindra Chakraborty <avanindra.d2.chakraborty@gmail.com>"]
+license = "MIT"
+readme="README.md"
+homepage= "https://github.com/AvanindraC/PMCLI"
+repository = "https://github.com/AvanindraC/PMCLI"
+keywords = ["PMCLI"]
+
+classifiers=[
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+	"Programming Language :: Python :: 3.9",
+        "Operating System :: Microsoft :: Windows :: Windows 10"
+    ]
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+click = "^8.0.1"
+cryptocode = "^0.1"
+
+[tool.poetry.dev-dependencies]
+
+
+[tool.poetry.scripts]
+pm = "pmcli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
