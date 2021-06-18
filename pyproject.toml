@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pmcli"
-version = "0.1.7"
+version = "0.2.0"
 description = "A Command Line Interface to encrypt, decrypt and save passwords dor windows"
 authors = ["Avanindra Chakraborty <avanindra.d2.chakraborty@gmail.com>"]
 license = "MIT"
@@ -16,7 +16,7 @@ classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
 	"Programming Language :: Python :: 3.9",
-        "Operating System :: Microsoft :: Windows :: Windows 10"
+        "Operating System :: OS Independent"
     ]
 
 
