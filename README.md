@@ -96,13 +96,13 @@ For using current directory, just provide `current` instead of the directory.
 ###### MASS DECRYPTION
 
 ```
-pm decrypt {directory} 
+pm decryptf {directory} 
 ```
 
 This gives you all of your stored passwords
 
 ```
-pm decrypt C://Users//arghy//Desktop//Office//files
+pm decryptf C://Users//arghy//Desktop//Office//files
 ```
 
 **NOTE: EVERY DECRYPTION METHOD NEEDS YOUT PM PASSWORD, HENCE IF YOU HAVE NOT SETUP YOUR PM, DECRYPTION WONT WORK**
