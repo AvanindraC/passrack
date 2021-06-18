@@ -1,6 +1,5 @@
-# PMCLI
-
-## A password encrypter and decrypter
+# PM- Password Manager
+## `pm` : A simple CLI for managing passwords
 
 Have important passwords to store? Use pmcli to encrypt your passwords into files and decrypt them whenever you want!
 
@@ -9,6 +8,19 @@ Have important passwords to store? Use pmcli to encrypt your passwords into file
 ```
 pip3 install pmcli 
 ```
+
+## Dependencies
++ `click` 
++ `click_help_colors`
++ `pyfiglet`
++ `cryptocode`
+
+## Built with
++ `Python 3.9.5` 
+
+## Supported Platforms:
+
++ Operating System = Cross-Platform
 
 ## How to use
 
@@ -29,6 +41,7 @@ Commands:
   decrypt   Decrypt any of your passwords
   decryptf  Decrypt all your passwords
   encrypt   Encrypt your message
+  info      Information about PMCLI
   init      Initialize pmcli for you to get started with it
 ```
 
@@ -54,18 +67,15 @@ There should be no output
 ##### Encryption:
 
 ```
-pm encrypt {directory} {note(optional)}
+pm encrypt {password} {note(optional)}
 ```
 
 For example:
 
 ```
-pm encrypt C://Users//doge//Desktop//Office//files 'Welcome982' -n google
+pm encrypt 'Welcome982' -n google
 ```
-
-This makes a data_encr.dat file which consists the message 'Hello World' in the files folder located in Office folder present in your Desktop.
-
-For using current directory, just provide `current` instead of the directory.
+Here the password `Welcome982` will be stored in encrypted format and stored in your device.
 
 In the above example, 'google' is an ID that gives the encrypted data and identity.
 
@@ -80,41 +90,70 @@ There are two methods of decrypting/obtaining your passwords
 ###### SPECIFIC DECRYPTION
 
 ```
-pm decrypt {directory} -n {note}
+pm decrypt -n {note}
 ```
 
 For example:
 
 ```
-pm decrypt C://Users//arghy//Desktop//Office//files -n google
+pm decrypt -n google
 ```
 
 This gives you the stored password identified by `google` NOTE/ID.
 
-For using current directory, just provide `current` instead of the directory.
-
 ###### MASS DECRYPTION
 
 ```
-pm decryptf {directory} 
+pm decryptf 
 ```
 
 This gives you all of your stored passwords
 
 ```
-pm decryptf C://Users//arghy//Desktop//Office//files
+pm decryptf
 ```
 
 **NOTE: EVERY DECRYPTION METHOD NEEDS YOUT PM PASSWORD, HENCE IF YOU HAVE NOT SETUP YOUR PM, DECRYPTION WONT WORK**
 
 ##### CLEAR
 
-`pm clear {directory}` cleans the data from data file
+`pm clear` cleans the data from data file
+
+## Release Notes
+
+- **Current Release- 0.2.4 (Major Update)**
+
+### What's new?
+
+- Double Encryption makes passwords safe and secure!
+- A beautiful TUI applied
+- Faster Performance
+- The Files are encrypted, and stored in your device, hence it's so secure that even you can't access them without pm
+
+#### Developers
+- [Avanindra Chakraborty](https://github.com/AvanindraC)
+- [Arghya Sarkar](https://github.com/arghyagod-coder)
+- [Shravan Asati](https://github.com/Shravan-1908)
+
 
 ### Developer Tools
 
-[Visual Studio Code](https://github.com/microsoft/vscode)
+- [Visual Studio Code](https://github.com/microsoft/vscode)
 
-[Python 3.9.5](https://python.org)
+- [Python 3.9.5](https://python.org)
 
-[Git](https://git-scm.com)
+- [Git](https://git-scm.com)
+
+- [Python Poetry](https://python-poetry.org/)
+
+## License
+
+License © 2021-Present Avanindra Chakraborty
+
+This repository is licensed under the MIT license. See [LICENSE](https://github.com/arghyagod-coder/lola/master/LICENSE) for details.
+
+## Special Notes
+
+- Contribution is appreciated! Visit the contribution guide in [Contribution Guide](CONTRIBUTING.md)
+- If you see anything uncomfortable or not working, file an issue in [the issue page](https://github.com/arghyagod-coder/lola/issues). Issues aren't ignored by the developers
+- Thanks for seeing my project!

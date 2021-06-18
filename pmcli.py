@@ -1,5 +1,5 @@
 '''
-Password Manager- 0.2.0
+Password Manager- 0.2.2
 
 --- Avanindra Chakroborty 
 |-----Arghya Sarkar
@@ -36,11 +36,13 @@ THE ABOVE COMMAND GIVES YOU THE WHOLE LIST OF SAVED PASSWORDS
 7. PM IS NOW MORE SECURE AND YOUR DATA IS STORED IN A SECURE WAY SO HACKERS.... GOOD BYE :)
 '''
 
-
+from click import secho
 import cryptocode
 import click
 import os
 import pickle
+from pyfiglet import Figlet
+from click_help_colors import HelpColorsGroup, HelpColorsCommand
 
 # MAIN ENCRYPTION LOGIC
 
@@ -78,8 +80,10 @@ def getTranslatedMessage(mode,message , key):
 
 # BASE COMMAND
 
-@click.group()
-@click.version_option('0.2.0')
+@click.group(
+    cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
+)
+@click.version_option('0.2.2')
 def main():
     """PM: Encrypt, decrypt and save your passwords"""
     pass
@@ -92,19 +96,14 @@ def main():
 # ENCRYPTION LOGIC
 
 @main.command('encrypt', help='Encrypt your message')
-@click.argument('directory', nargs=1)
 @click.argument('content', nargs=1)
 @click.option('--note', nargs=1)
-def encrypt(content, directory, note):
-    try:
-        cce = getTranslatedMessage('e', content, 13)   
-        msg = cryptocode.encrypt(cce, "abcd")
-        if directory!='current':
-            os.chdir(directory)
-        file = open('.data_encr.dat', 'a')
-        file.write((msg+f'------------------ {note}'+'\n'))
-    except FileNotFoundError:
-        print("The directory doesn't exist")
+def encrypt(content, note):
+    cce = getTranslatedMessage('e', content, 13)   
+    msg = cryptocode.encrypt(cce, "abcd")
+    file = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'a')
+    file.write((msg+f'------------------ {note}'+'\n'))
+
     
 
 '''
@@ -114,40 +113,34 @@ def encrypt(content, directory, note):
 
 # SPECIFIC DECRYPTION LOGIC
 @main.command('decrypt', help='Decrypt any of your passwords')
-@click.argument('directory', nargs=1)
 @click.option('--note', '-n', nargs=1)
-def decrypt(note, directory):
-    inp = click.prompt('Enter your password')
-    ops = pickle.load(open('.pmcli.dat', 'rb'))
+def decrypt(note):
+    inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
+    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, "abcd")
     if inp==ops:
         if note==None:
             note=''
-        try:
-            if directory!='current':
-                os.chdir(directory)
-            a = open('.data_encr.dat', 'r')
-            b = a.readlines()
-            res=0
-            for line in b:
-                if note in line:
-                    line= line.replace('------------------ {note}', '')
-                    line =line.replace('\n', '')
-                    c = line
-                    dmsg = cryptocode.decrypt(c, 'abcd')
-                    ccd = getTranslatedMessage('d', dmsg, 13) 
-                    print(ccd)
-                    break
-                else:
-                    res+=1
-            
-        except FileNotFoundError:
-            print("The directory or file doesn't exist")
+        a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
+        b = a.readlines()
+        res=0
+        for line in b:
+            if note in line:
+                line= line.replace('------------------ {note}', '')
+                line =line.replace('\n', '')
+                c = line
+                dmsg = cryptocode.decrypt(c, 'abcd')
+                ccd = getTranslatedMessage('d', dmsg, 13) 
+                click.clear()
+                secho(ccd, fg='blue', bg= 'black')
+                break
+            else:
+                res+=1
         if res==(len(b)):
-            print('Invalid Identity Key')
+            secho('Invalid Identity Key', fg='red', bg= 'black')
 
     else:
-        print('Invalid Password')
+        click.secho('Invalid Password', fg='red', bg= 'black')
 
 '''
 ================================================================================================
@@ -157,29 +150,23 @@ def decrypt(note, directory):
 # Mass DECRYPTION LOGIC
 
 @main.command('decryptf', help='Decrypt all your passwords')
-@click.argument('directory', nargs=1)
-def decrypt(directory):
-    inp = click.prompt('Enter your password: ')
-    ops = pickle.load(open('.pmcli.dat', 'rb'))
+def decrypt():
+    inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
+    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, "abcd")
     if inp==ops:
-        try:
-            if directory!='current':
-                os.chdir(directory)
-            a = open('.data_encr.dat', 'r')
-            b = a.readlines()
-            cd=[]
-            for line in b:
-                cd.append(line)
-
-            for c in cd:   
-                dmsg = cryptocode.decrypt(c, 'abcd')
-                ccd = getTranslatedMessage('d', dmsg, 13) 
-                print(ccd)
-        except FileNotFoundError:
-            print("The directory or file doesn't exist")
+        a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
+        b = a.readlines()
+        cd=[]
+        for line in b:
+            cd.append(line)
+        for c in cd:   
+            dmsg = cryptocode.decrypt(c, 'abcd')
+            ccd = getTranslatedMessage('d', dmsg, 13) 
+            click.clear()
+            secho(ccd, fg='blue', bg= 'black')
     else:
-        print('Invalid Password')
+        secho('Invalid Password', fg='red', bg= 'black')
 
 '''
 ================================================================================================
@@ -189,11 +176,8 @@ def decrypt(directory):
 # CLEAR COMMAND
 
 @main.command(help='Clear existing data')
-@click.argument('directory', nargs=1)
-def clear(directory):
-    if directory!='current':
-        os.chdir(directory)
-    a = open('.data_encr.dat', 'w')
+def clear():
+    a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'w')
     b = a.write('')
 
 '''
@@ -205,22 +189,31 @@ def clear(directory):
 
 @main.command('init', help='Initialize pmcli for you to get started with it')
 def init():
+    os.mkdir((os.path.join(os.path.expanduser("~"), ".pmcli")))
     defps = 'fetcher'
     defps = cryptocode.encrypt(defps, "abcd")
-    pickle.dump(defps, open('.pmcli.dat', 'wb'))
+    pickle.dump(defps, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
 
 @main.command('config', help='Set your configuration for pm')
 @click.option('--password', '-ps')
 def config(password):
-    inp = click.prompt('Enter your old password: ', confirmation_prompt=True)
-    ops = pickle.load(open('.pmcli.dat', 'rb'))
+    inp = click.prompt(click.style('Enter your old password', fg='blue'), confirmation_prompt=True)
+    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, "abcd")
     if inp==ops:
         password= cryptocode.encrypt(password, "abcd")
-        pickle.dump(password, open('.pmcli.dat', 'wb'))
+        pickle.dump(password, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
     else:
-        click.echo('Access Denied!')
+        click.secho('Access Denied!', fg='red', bg= 'black')
 
+@main.command('info', help='Information about PMCLI')
+def info():
+    """Info About CLI """
+    f = Figlet(font='standard')
+    click.secho(f.renderText('PM'), fg='green')
+    click.secho("pm: a simple CLI password manager",fg='cyan')
+    click.secho("\n\nPasswords are meant to be safe, \n  So it's our duty to save them!",fg='cyan')
+    click.secho("\n\nDeveloper: Avanindra Chakraborty", fg='green', bg= 'black')
 
 '''
 ================================================================================================
