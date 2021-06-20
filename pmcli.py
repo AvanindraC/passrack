@@ -1,8 +1,8 @@
 '''
 Password Manager- 0.2.2
 
---- Avanindra Chakroborty 
-|-----Arghya Sarkar
+- Avanindra Chakroborty 
+|+- Arghya Sarkar
 
 - New Features:
 
