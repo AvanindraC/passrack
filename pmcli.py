@@ -1,8 +1,8 @@
 '''
 Password Manager- 0.2.2
 
-- Avanindra Chakroborty 
-|+- Arghya Sarkar
+--- Avanindra Chakroborty 
+|-----Arghya Sarkar
 
 - New Features:
 
@@ -43,199 +43,190 @@ import os
 import pickle
 from pyfiglet import Figlet
 from click_help_colors import HelpColorsGroup, HelpColorsCommand
-
+from random import randint
+import random
+import json
 # MAIN ENCRYPTION LOGIC
+cck = randint(1, 40)
 
 SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
+cek1 = random.choice(SYMBOLS)
+cek2 = random.choice(SYMBOLS)
+cek3 = random.choice(SYMBOLS)
+cek4 = random.choice(SYMBOLS) 
+cek = cek1 + cek2 + cek3+ cek4
 MAX_KEY_SIZE = len(SYMBOLS)
-
-def getKey() -> int:
+def getKey():
     key = 0
     while True:
-        key = 13
+        key = cck
         if (key >= 1 and key <= MAX_KEY_SIZE):
             return key
-
-
-def getTranslatedMessage(mode, message, key) -> str:
-    """
-    returns Translated Message
-    """
+def getTranslatedMessage(mode,message , key):
     if mode [0] == 'd':
         key = -key
-
     translated = ''
             
     for symbol in message:
-
         symbolIndex = SYMBOLS.find(symbol)
-        
         if symbolIndex == -1:
             translated += symbol
-        
         else:
             symbolIndex += key
-            len_symbols = len(SYMBOLS)
-
-            if symbolIndex >= len_symbols:
-                symbolIndex -= len_symbols
-        
+            if symbolIndex >= len(SYMBOLS):
+                symbolIndex -= len(SYMBOLS)
             elif symbolIndex < 0:
-                symbolIndex += len_symbols
+                symbolIndex += len(SYMBOLS)
                     
             translated += SYMBOLS[symbolIndex]
-
     return translated
 
+'''
+================================================================================================
+================================================================================================
+'''
 
-##################################### BASE COMMAND #############################################
+# BASE COMMAND
 
 @click.group(
-    cls=HelpColorsGroup, 
-    help_headers_color="yellow", 
-    help_options_color="cyan"
+    cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option('0.2.2')
+@click.version_option('0.2.5')
 def main():
     """PM: Encrypt, decrypt and save your passwords"""
     pass
 
+'''
+================================================================================================
+================================================================================================
+'''
 
-################################### ENCRYPTION LOGIC ###########################################
-
+# ENCRYPTION LOGIC
 
 @main.command('encrypt', help='Encrypt your message')
 @click.argument('content', nargs=1)
 @click.option('--note', nargs=1)
 def encrypt(content, note):
-    cce = getTranslatedMessage('e', content, 13)   
-    
-    msg = cryptocode.encrypt(cce, "abcd")
-    
+    cce = getTranslatedMessage('e', content, cck)   
+    msg = cryptocode.encrypt(cce, cek)
     file = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'a')
-    file.write(f'{msg}------------------ {note}\n')
+    file.write((msg+f'------------------ {note}'+'\n'))
 
+    
 
-############################### SPECIFIC DECRYPTION LOGIC #####################################
+'''
+================================================================================================
+================================================================================================
+'''
 
-#
+# SPECIFIC DECRYPTION LOGIC
 @main.command('decrypt', help='Decrypt any of your passwords')
 @click.option('--note', '-n', nargs=1)
 def decrypt(note):
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
-
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
-    ops = cryptocode.decrypt(ops, "abcd")
-
-    if inp == ops:
-        if note == None: note = '' # if note is none, make it a blank string
-
+    ops = cryptocode.decrypt(ops, cek)
+    if inp==ops:
+        if note==None:
+            note=''
         a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
         b = a.readlines()
-        res = 0
-
+        res=0
         for line in b:
             if note in line:
-                line = line.replace('------------------ {note}', '')
-                line = line.replace('\n', '')
+                line= line.replace('------------------ {note}', '')
+                line =line.replace('\n', '')
                 c = line
-
-                dmsg = cryptocode.decrypt(c, 'abcd')
-                ccd = getTranslatedMessage('d', dmsg, 13) 
+                dmsg = cryptocode.decrypt(c, cek)
+                ccd = getTranslatedMessage('d', dmsg, cck) 
                 click.clear()
-
                 secho(ccd, fg='blue', bg= 'black')
                 break
             else:
-                res += 1
-
-        if res == len(b):
+                res+=1
+        if res==(len(b)):
             secho('Invalid Identity Key', fg='red', bg= 'black')
 
     else:
         click.secho('Invalid Password', fg='red', bg= 'black')
 
-################################ Mass DECRYPTION LOGIC ######################################
+'''
+================================================================================================
+================================================================================================
+'''
 
-# 
+# Mass DECRYPTION LOGIC
 
 @main.command('decryptf', help='Decrypt all your passwords')
 def decrypt():
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
-
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
-    ops = cryptocode.decrypt(ops, "abcd")
-    
-    if inp == ops:
+    ops = cryptocode.decrypt(ops, cek)
+    if inp==ops:
         a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
         b = a.readlines()
-        cd = []
-
+        cd=[]
         for line in b:
             cd.append(line)
-
         for c in cd:   
-            dmsg = cryptocode.decrypt(c, 'abcd')
-
-            ccd = getTranslatedMessage('d', dmsg, 13) 
+            dmsg = cryptocode.decrypt(c, cek)
+            ccd = getTranslatedMessage('d', dmsg, cck) 
             click.clear()
-
             secho(ccd, fg='blue', bg= 'black')
-    
     else:
         secho('Invalid Password', fg='red', bg= 'black')
 
-################################## CLEAR COMMAND #############################################
+'''
+================================================================================================
+================================================================================================
+'''
 
+# CLEAR COMMAND
 
 @main.command(help='Clear existing data')
 def clear():
     a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'w')
     b = a.write('')
 
+'''
+================================================================================================
+================================================================================================
+'''
 
-################################### SETUP COMMANDS ###########################################
-
+# SETUP COMMANDS
 
 @main.command('init', help='Initialize pmcli for you to get started with it')
 def init():
     os.mkdir((os.path.join(os.path.expanduser("~"), ".pmcli")))
-    
     defps = 'fetcher'
     defps = cryptocode.encrypt(defps, "abcd")
-    
     pickle.dump(defps, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
-
 
 @main.command('config', help='Set your configuration for pm')
 @click.option('--password', '-ps')
 def config(password):
     inp = click.prompt(click.style('Enter your old password', fg='blue'), confirmation_prompt=True)
-    
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, "abcd")
-    
-    if inp == ops:
-        password = cryptocode.encrypt(password, "abcd")
+    if inp==ops:
+        password= cryptocode.encrypt(password, "abcd")
         pickle.dump(password, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
-    
     else:
         click.secho('Access Denied!', fg='red', bg= 'black')
-
 
 @main.command('info', help='Information about PMCLI')
 def info():
     """Info About CLI """
     f = Figlet(font='standard')
-
     click.secho(f.renderText('PM'), fg='green')
     click.secho("pm: a simple CLI password manager",fg='cyan')
-
     click.secho("\n\nPasswords are meant to be safe, \n  So it's our duty to save them!",fg='cyan')
     click.secho("\n\nDeveloper: Avanindra Chakraborty", fg='green', bg= 'black')
 
-
-################################################################################################
+'''
+================================================================================================
+================================================================================================
+'''
 
 if __name__ == "__main__":
     main()
