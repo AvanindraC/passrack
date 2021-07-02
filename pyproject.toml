@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "pmcli"
-version = "0.2.2"
-description = "A Command Line Interface to encrypt, decrypt and save passwords dor windows"
-authors = ["Avanindra Chakraborty <avanindra.d2.chakraborty@gmail.com>"]
+name = "passrack"
+version = "0.1.2"
+description = "A Command Line Interface to encrypt, decrypt and save passwords"
+authors = ["Avanindra Chakraborty <avanindra.d2.chakraborty@gmail.com>", Arghya Sarkar <arghyasarkar.nolan@gmail.com>]
 license = "MIT"
 readme="README.md"
 homepage= "https://github.com/AvanindraC/PMCLI"
 repository = "https://github.com/AvanindraC/PMCLI"
-keywords = ["PMCLI"]
+keywords = ["PassRack"]
 
 classifiers=[
         "License :: OSI Approved :: MIT License",
@@ -24,12 +24,14 @@ classifiers=[
 python = "^3.7"
 click = "^8.0.1"
 cryptocode = "^0.1"
+click-help-colors = "^0.9"
+pyfiglet = "^0.8.post1"
 
 [tool.poetry.dev-dependencies]
 
 
 [tool.poetry.scripts]
-pm = "pmcli:main"
+prack = "passrack:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

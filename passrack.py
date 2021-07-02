@@ -1,5 +1,5 @@
 '''
-Password Manager- 0.2.8
+PassRack- 0.1.2
 
 --- Avanindra Chakroborty 
 |-----Arghya Sarkar
@@ -10,30 +10,30 @@ Completely Renovated Workflow
 
 FLOW:
 
-1. RUN pm init TO INITIALISE YOUR PM WITH DEFAULT CONFIGURATION
+1. RUN prack init TO INITIALISE YOUR PassRack WITH DEFAULT CONFIGURATION
 
-2. RUN pm config -ps <password> OR pm config --password <password> TO SET YOUR OWN PASSWORD (CHANGING THE DEFAULT ONE WHICH IS FETCHER)
+2. RUN prack config -ps <password> OR prack config --password <password> TO SET YOUR OWN PASSWORD (CHANGING THE DEFAULT ONE WHICH IS FETCHER)
 
-3. NEW ENCRYPTION COMMAND :- pm encrypt <directory> <message> <note(optional)>
------ NOTE IS LIKE AN ID TO YOUR PASSWORD. FOR EXAMPLE YOU ARE STORING A PASSWORD FOR GOOGLE ACCOUNT. USE pm encrypt <directory> <message> googleac
+3. NEW ENCRYPTION COMMAND :- prack encrypt <directory> <message> <note(optional)>
+----- NOTE IS LIKE AN ID TO YOUR PASSWORD. FOR EXAMPLE YOU ARE STORING A PASSWORD FOR GOOGLE ACCOUNT. USE prack encrypt <directory> <message> googleac
 ----- THIS ID/NOTE IS USED TO LOCATE YOUR PASSWORDS WHILE DECRYPTING IT
------ USE pm encrypt current <message> <note(optional)> TO WORK IN YOUR CURRENT DIRECTORY
+----- USE prack encrypt current <message> <note(optional)> TO WORK IN YOUR CURRENT DIRECTORY
 
 4. A DATA FILE ON THE SAME LOCATION GETS CREATED WHICH IS HIDDEN. THE SINGLE DATA FILE STORES ALL PASSWORDS
 
 5. NEW DECRYPTION COMMAND:- THERE ARE TWO DECRYPTION COMMANDS
 
-pm decrypt <directory> -n <note> OR pm decrypt <directory> --note <note>
+prack decrypt <directory> -n <note> OR prack decrypt <directory> --note <note>
 
 THE ABOVE COMMAND DECRYPTS A SPECIFIC NOTE/ID OF YOUR PASSWORD
 
-pm decryptf <directory>
+prack decryptf <directory>
 
 THE ABOVE COMMAND GIVES YOU THE WHOLE LIST OF SAVED PASSWORDS
 
-6. CLEAR COMMAND: - pm clear <directory> CLEARS ALL THE STORED DATA FROM YOUR DATA FILE
+6. CLEAR COMMAND: - prack clear <directory> CLEARS ALL THE STORED DATA FROM YOUR DATA FILE
 
-7. PM IS NOW MORE SECURE AND YOUR DATA IS STORED IN A SECURE WAY SO HACKERS.... GOOD BYE :)
+7. PassRack IS NOW MORE SECURE AND YOUR DATA IS STORED IN A SECURE WAY SO HACKERS.... GOOD BYE :)
 '''
 
 from click import secho
@@ -45,19 +45,8 @@ from pyfiglet import Figlet
 from click_help_colors import HelpColorsGroup, HelpColorsCommand
 from random import randint
 import random
-# Defining BinarytoDecimal() function
-'''
-================================================================================================
-================================================================================================
-'''
-      
+import string
  
-'''
-================================================================================================
-================================================================================================
-'''  
-# MAIN ENCRYPTION LOGIC
-
 '''
 ================================================================================================
 ================================================================================================
@@ -67,8 +56,8 @@ SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
 
 MAX_KEY_SIZE = len(SYMBOLS)
 def getKey():
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
     key = 0
     while True:
         key = cck
@@ -105,7 +94,7 @@ def getTranslatedMessage(mode,message , key):
 )
 @click.version_option('0.2.8')
 def main():
-    """PM: Encrypt, decrypt and save your passwords"""
+    """PassRack: Encrypt, decrypt and save your passwords"""
     pass
 
 '''
@@ -119,11 +108,11 @@ def main():
 @click.argument('content', nargs=1)
 @click.option('--note','-n', nargs=1)
 def encrypt(content, note):
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
     cce = getTranslatedMessage('e', content, cck )   
     msg = cryptocode.encrypt(cce, cek)
-    file = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'a')
+    file = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'a')
     file.write((msg+f'------------------ {note}'+'\n'))
 
     
@@ -137,15 +126,15 @@ def encrypt(content, note):
 @main.command('decrypt', help='Decrypt any of your passwords')
 @click.option('--note', '-n', nargs=1)
 def decrypt(note):
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
-    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
+    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
         if note==None:
             note=''
-        a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
+        a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'r')
         b = a.readlines()
         res=0
         for line in b:
@@ -176,13 +165,13 @@ def decrypt(note):
 
 @main.command('decryptf', help='Decrypt all your passwords')
 def decrypt():
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
-    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
+    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
-        a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
+        a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'r')
         b = a.readlines()
         cd=[]
         for line in b:
@@ -207,7 +196,7 @@ def decrypt():
 
 @main.command(help='Clear existing data')
 def clear():
-    a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'w')
+    a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'w')
     b = a.write('')
 
 '''
@@ -217,42 +206,41 @@ def clear():
 
 # SETUP COMMANDS
 
-@main.command('init', help='Initialize pmcli for you to get started with it')
+@main.command('init', help='Initialize passrack for you to get started with it')
 def init():
     try:
-        os.mkdir((os.path.join(os.path.expanduser("~"), ".pmcli")))
+        os.mkdir((os.path.join(os.path.expanduser("~"), ".passrack")))
         defps = 'fetcher'
         key = random.choice(SYMBOLS)
-        pickle.dump(key, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'wb'))
-        key = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+        pickle.dump(key, open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'wb'))
+        key = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
         defps = cryptocode.encrypt(defps, key)
-        pickle.dump(defps, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
+        pickle.dump(defps, open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'wb'))
         cck = randint(1,25)
-        pickle.dump(cck, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'wb'))
+        pickle.dump(cck, open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'wb'))
     except FileExistsError as e:
         print('File already exists')
-@main.command('config', help='Set your configuration for pm')
+@main.command('config', help='Set your configuration for PassRack')
 @click.option('--password', '-ps')
 def config(password):
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your old password', fg='blue'), confirmation_prompt=True)
-    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
+    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
         passcode = click.prompt(click.style('Enter new password', fg='blue'), confirmation_prompt=True)
         password= cryptocode.encrypt(passcode, cek)
-        pickle.dump(password, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
+        pickle.dump(password, open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'wb'))
     else:
         click.secho('Access Denied!', fg='red', bg= 'black')
 
 
-@main.command('info', help='Information about PMCLI')
+@main.command('info', help='Information about PassRack')
 def info():
     """Info About CLI """
     f = Figlet(font='standard')
-    click.secho(f.renderText('PM'), fg='green')
-    click.secho("pm: a simple CLI password manager",fg='cyan')
+    click.secho(f.renderText('PassRack'), fg='green')
+    click.secho("PassRack: a simple CLI password manager",fg='cyan')
     click.secho("\n\nPasswords are meant to be safe, \n  So it's our duty to save them!",fg='cyan')
     click.secho("\n\nDeveloper: Avanindra Chakraborty", fg='green', bg= 'black')
 
@@ -260,6 +248,41 @@ def info():
 ================================================================================================
 ================================================================================================
 '''
+
+# Password Suggester
+
+@main.command('suggest', help='Get a password suggestion')
+@click.option('--note', '-n')
+def suggest(note):
+    s1 = string.ascii_lowercase
+    s2 = string.ascii_uppercase
+    s3 = string.digits
+    plen = 12
+    s = []
+    s.extend(list(s1))
+    s.extend(list(s2))
+    s.extend(list(s3))
+    random.shuffle(s)
+    psw = ''.join(s[0:plen])
+    click.echo(f'PassRack suggests: \n\n {psw}')
+    ans = click.prompt('\n\nSave this password? (y/n)')
+    if ans.lower()=='y' or ans.lower()=="yes":
+        cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+        cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
+        cce = getTranslatedMessage('e', psw, cck )   
+        msg = cryptocode.encrypt(cce, cek)
+        file = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'a')
+        file.write((msg+f'------------------ {note}'+'\n'))
+    elif ans.lower()=="no" or ans.lower()=="n":
+        pass
+    else:
+        click.echo('Invalid Input, Process Terminated')
+
+'''
+================================================================================================
+================================================================================================
+'''
+
 
 if __name__ == "__main__":
     main()
