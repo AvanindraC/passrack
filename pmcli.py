@@ -50,13 +50,6 @@ import random
 ================================================================================================
 ================================================================================================
 '''
-def BinaryToDecimal(binary):
-      
-    # Using int function to convert to
-    # string   
-    string = int(binary, 2)
-      
-    return string
       
  
 '''
@@ -75,6 +68,7 @@ SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
 MAX_KEY_SIZE = len(SYMBOLS)
 def getKey():
     cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     key = 0
     while True:
         key = cck
@@ -115,23 +109,22 @@ def main():
     pass
 
 '''
-=================================================================================================
-=================================================================================================
+================================================================================================
+================================================================================================
 '''
 
 # ENCRYPTION LOGIC
 
 @main.command('encrypt', help='Encrypt your message')
 @click.argument('content', nargs=1)
-def encrypt(content):
-    
+@click.option('--note','-n', nargs=1)
+def encrypt(content, note):
     cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
     cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     cce = getTranslatedMessage('e', content, cck )   
     msg = cryptocode.encrypt(cce, cek)
-    resf = ''.join(format(ord(i), '08b') for i in msg)
     file = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'a')
-    file.write((resf+'\n'))
+    file.write((msg+f'------------------ {note}'+'\n'))
 
     
 
@@ -142,38 +135,32 @@ def encrypt(content):
 
 # SPECIFIC DECRYPTION LOGIC
 @main.command('decrypt', help='Decrypt any of your passwords')
-def decrypt():
-    
+@click.option('--note', '-n', nargs=1)
+def decrypt(note):
     cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
     cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
+        if note==None:
+            note=''
         a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
         b = a.readlines()
         res=0
         for line in b:
-            line =line.replace('\n', '')
-            c = line
-            bin_data = c
-            str_data =' '
-   
-            for i in range(0, len(bin_data), 7):
-      
-
-                temp_data = bin_data[i:i + 7]
-
-                decimal_data = BinaryToDecimal(temp_data)
-       
-                str_data = str_data + chr(decimal_data)
-            dmsg = cryptocode.decrypt(str_data, cek)
-            ccd = getTranslatedMessage('d', dmsg, cck) 
-            click.clear()
-            secho(ccd, fg='blue', bg= 'black')
-            break
-        else:
-            res+=1
+            if note in line:
+                line= line.replace('------------------ {note}', '')
+                line =line.replace('\n', '')
+                c = line
+                
+                dmsg = cryptocode.decrypt(c, cek)
+                ccd = getTranslatedMessage('d', dmsg, cck) 
+                click.clear()
+                secho(ccd, fg='blue', bg= 'black')
+                break
+            else:
+                res+=1
         if res==(len(b)):
             secho('Invalid Identity Key', fg='red', bg= 'black')
 
@@ -188,8 +175,7 @@ def decrypt():
 # Mass DECRYPTION LOGIC
 
 @main.command('decryptf', help='Decrypt all your passwords')
-def decryptf():
-    
+def decrypt():
     cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
     cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
@@ -204,18 +190,8 @@ def decryptf():
         for c in cd:   
 
             c = line
-            bin_data = c
-            str_data =' '
-   
-            for i in range(0, len(bin_data), 7):
-      
-
-                temp_data = bin_data[i:i + 7]
-
-                decimal_data = BinaryToDecimal(temp_data)
-       
-                str_data = str_data + chr(decimal_data)
-            dmsg = cryptocode.decrypt(str_data, cek)
+            
+            dmsg = cryptocode.decrypt(c, cek)
             ccd = getTranslatedMessage('d', dmsg, cck) 
             click.clear()
             secho(ccd, fg='blue', bg= 'black')
