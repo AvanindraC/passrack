@@ -1,5 +1,5 @@
 '''
-Password Manager- 0.2.2
+Password Manager- 0.2.8
 
 --- Avanindra Chakroborty 
 |-----Arghya Sarkar
@@ -45,18 +45,36 @@ from pyfiglet import Figlet
 from click_help_colors import HelpColorsGroup, HelpColorsCommand
 from random import randint
 import random
-import json
+# Defining BinarytoDecimal() function
+'''
+================================================================================================
+================================================================================================
+'''
+def BinaryToDecimal(binary):
+      
+    # Using int function to convert to
+    # string   
+    string = int(binary, 2)
+      
+    return string
+      
+ 
+'''
+================================================================================================
+================================================================================================
+'''  
 # MAIN ENCRYPTION LOGIC
-cck = randint(1, 40)
+
+'''
+================================================================================================
+================================================================================================
+'''
 
 SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
-cek1 = random.choice(SYMBOLS)
-cek2 = random.choice(SYMBOLS)
-cek3 = random.choice(SYMBOLS)
-cek4 = random.choice(SYMBOLS) 
-cek = cek1 + cek2 + cek3+ cek4
+
 MAX_KEY_SIZE = len(SYMBOLS)
 def getKey():
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
     key = 0
     while True:
         key = cck
@@ -91,7 +109,7 @@ def getTranslatedMessage(mode,message , key):
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option('0.2.5')
+@click.version_option('0.2.8')
 def main():
     """PM: Encrypt, decrypt and save your passwords"""
     pass
@@ -105,12 +123,15 @@ def main():
 
 @main.command('encrypt', help='Encrypt your message')
 @click.argument('content', nargs=1)
-@click.option('--note', nargs=1)
-def encrypt(content, note):
-    cce = getTranslatedMessage('e', content, cck)   
+def encrypt(content):
+    
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+    cce = getTranslatedMessage('e', content, cck )   
     msg = cryptocode.encrypt(cce, cek)
+    resf = ''.join(format(ord(i), '08b') for i in msg)
     file = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'a')
-    file.write((msg+f'------------------ {note}'+'\n'))
+    file.write((resf+'\n'))
 
     
 
@@ -121,29 +142,38 @@ def encrypt(content, note):
 
 # SPECIFIC DECRYPTION LOGIC
 @main.command('decrypt', help='Decrypt any of your passwords')
-@click.option('--note', '-n', nargs=1)
-def decrypt(note):
+def decrypt():
+    
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
-        if note==None:
-            note=''
         a = open((os.path.join(os.path.expanduser("~"), ".pmcli", ".data_encr.dat")), 'r')
         b = a.readlines()
         res=0
         for line in b:
-            if note in line:
-                line= line.replace('------------------ {note}', '')
-                line =line.replace('\n', '')
-                c = line
-                dmsg = cryptocode.decrypt(c, cek)
-                ccd = getTranslatedMessage('d', dmsg, cck) 
-                click.clear()
-                secho(ccd, fg='blue', bg= 'black')
-                break
-            else:
-                res+=1
+            line =line.replace('\n', '')
+            c = line
+            bin_data = c
+            str_data =' '
+   
+            for i in range(0, len(bin_data), 7):
+      
+
+                temp_data = bin_data[i:i + 7]
+
+                decimal_data = BinaryToDecimal(temp_data)
+       
+                str_data = str_data + chr(decimal_data)
+            dmsg = cryptocode.decrypt(str_data, cek)
+            ccd = getTranslatedMessage('d', dmsg, cck) 
+            click.clear()
+            secho(ccd, fg='blue', bg= 'black')
+            break
+        else:
+            res+=1
         if res==(len(b)):
             secho('Invalid Identity Key', fg='red', bg= 'black')
 
@@ -158,7 +188,10 @@ def decrypt(note):
 # Mass DECRYPTION LOGIC
 
 @main.command('decryptf', help='Decrypt all your passwords')
-def decrypt():
+def decryptf():
+    
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
@@ -169,7 +202,20 @@ def decrypt():
         for line in b:
             cd.append(line)
         for c in cd:   
-            dmsg = cryptocode.decrypt(c, cek)
+
+            c = line
+            bin_data = c
+            str_data =' '
+   
+            for i in range(0, len(bin_data), 7):
+      
+
+                temp_data = bin_data[i:i + 7]
+
+                decimal_data = BinaryToDecimal(temp_data)
+       
+                str_data = str_data + chr(decimal_data)
+            dmsg = cryptocode.decrypt(str_data, cek)
             ccd = getTranslatedMessage('d', dmsg, cck) 
             click.clear()
             secho(ccd, fg='blue', bg= 'black')
@@ -197,22 +243,33 @@ def clear():
 
 @main.command('init', help='Initialize pmcli for you to get started with it')
 def init():
-    os.mkdir((os.path.join(os.path.expanduser("~"), ".pmcli")))
-    defps = 'fetcher'
-    defps = cryptocode.encrypt(defps, "abcd")
-    pickle.dump(defps, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
-
+    try:
+        os.mkdir((os.path.join(os.path.expanduser("~"), ".pmcli")))
+        defps = 'fetcher'
+        key = random.choice(SYMBOLS)
+        pickle.dump(key, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'wb'))
+        key = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
+        defps = cryptocode.encrypt(defps, key)
+        pickle.dump(defps, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
+        cck = randint(1,25)
+        pickle.dump(cck, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'wb'))
+    except FileExistsError as e:
+        print('File already exists')
 @main.command('config', help='Set your configuration for pm')
 @click.option('--password', '-ps')
 def config(password):
+    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".cck.dat")), 'rb'))
+    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".key.dat")), 'rb'))
     inp = click.prompt(click.style('Enter your old password', fg='blue'), confirmation_prompt=True)
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'rb'))
-    ops = cryptocode.decrypt(ops, "abcd")
+    ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
-        password= cryptocode.encrypt(password, "abcd")
+        passcode = click.prompt(click.style('Enter new password', fg='blue'), confirmation_prompt=True)
+        password= cryptocode.encrypt(passcode, cek)
         pickle.dump(password, open((os.path.join(os.path.expanduser("~"), ".pmcli", ".pmcli.dat")), 'wb'))
     else:
         click.secho('Access Denied!', fg='red', bg= 'black')
+
 
 @main.command('info', help='Information about PMCLI')
 def info():
@@ -230,3 +287,4 @@ def info():
 
 if __name__ == "__main__":
     main()
+    
