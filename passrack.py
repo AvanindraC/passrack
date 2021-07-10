@@ -1,5 +1,5 @@
 '''
-PassRack- 0.1.2
+PassRack- 0.1.6
 
 --- Avanindra Chakroborty 
 |-----Arghya Sarkar
@@ -92,7 +92,7 @@ def getTranslatedMessage(mode,message , key):
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option('0.2.8')
+@click.version_option('0.1.6')
 def main():
     """PassRack: Encrypt, decrypt and save your passwords"""
     pass
@@ -108,15 +108,18 @@ def main():
 @click.argument('content', nargs=1)
 @click.option('--note','-n', nargs=1)
 def encrypt(content, note):
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
-    cce = getTranslatedMessage('e', content, cck )   
-    msg = cryptocode.encrypt(cce, cek)
-    file = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'a')
-    file.write((msg+f'------------------ {note}'+'\n'))
-
-    
-
+    try:
+        cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+        cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
+        cce = getTranslatedMessage('e', content, cck )   
+        msg = cryptocode.encrypt(cce, cek)
+        file = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'a')
+        file.write((msg+f'------------------ {note}'+'\n'))
+        click.clear()
+        
+        click.secho('Encryption Successful')
+    except FileNotFoundError as e:
+        click.secho('Please run prack init to set up passrack for your use')
 '''
 ================================================================================================
 ================================================================================================
@@ -126,67 +129,67 @@ def encrypt(content, note):
 @main.command('decrypt', help='Decrypt any of your passwords')
 @click.option('--note', '-n', nargs=1)
 def decrypt(note):
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
-    inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
-    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
-    ops = cryptocode.decrypt(ops, cek)
-    if inp==ops:
-        if note==None:
-            note=''
-        a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'r')
-        b = a.readlines()
-        res=0
-        for line in b:
-            if note in line:
-                line= line.replace('------------------ {note}', '')
-                line =line.replace('\n', '')
-                c = line
+    try:
+        cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+        cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
+        inp = click.prompt(click.style('Enter your password', fg='cyan', bg = "black"),hide_input=True ,confirmation_prompt=True)
+        ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
+        ops = cryptocode.decrypt(ops, cek)
+        if inp==ops:
+            if note==None:
+                note=''
+            a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'r')
+            b = a.readlines()
+            res=0
+            for line in b:
+                if note in line:
+                    line= line.replace('------------------ {note}', '')
+                    line =line.replace('\n', '')
+                    c = line
                 
-                dmsg = cryptocode.decrypt(c, cek)
-                ccd = getTranslatedMessage('d', dmsg, cck) 
-                click.clear()
-                secho(ccd, fg='blue', bg= 'black')
-                break
-            else:
-                res+=1
-        if res==(len(b)):
-            secho('Invalid Identity Key', fg='red', bg= 'black')
+                    dmsg = cryptocode.decrypt(c, cek)
+                    ccd = getTranslatedMessage('d', dmsg, cck) 
+                    click.clear()
+                    secho(ccd, fg='cyan', bg = "black")
+                    break
+                else:
+                    res+=1
+            if res==(len(b)):
+                secho('Invalid Identity Key', fg='red', bg= 'black')
 
-    else:
-        click.secho('Invalid Password', fg='red', bg= 'black')
-
+        else:
+            click.secho('Invalid Password', fg='red', bg= 'black')
+    except FileNotFoundError as e:
+        click.secho('Please run prack init to set up passrack for your use')
 '''
 ================================================================================================
-================================================================================================
+===========================================4=====================================================
 '''
 
 # Mass DECRYPTION LOGIC
-
 @main.command('decryptf', help='Decrypt all your passwords')
 def decrypt():
-    cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
-    cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
-    inp = click.prompt(click.style('Enter your password', fg='blue'), confirmation_prompt=True)
-    ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
-    ops = cryptocode.decrypt(ops, cek)
-    if inp==ops:
-        a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'r')
-        b = a.readlines()
-        cd=[]
-        for line in b:
-            cd.append(line)
-        for c in cd:   
-
-            c = line
-            
-            dmsg = cryptocode.decrypt(c, cek)
-            ccd = getTranslatedMessage('d', dmsg, cck) 
+    try:
+        cck = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".cck.dat")), 'rb'))
+        cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
+        inp = click.prompt(click.style('Enter your password', fg='cyan', bg = "black"),hide_input=True ,confirmation_prompt=True)
+        ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
+        ops = cryptocode.decrypt(ops, cek)
+        if inp==ops:
             click.clear()
-            secho(ccd, fg='blue', bg= 'black')
-    else:
-        secho('Invalid Password', fg='red', bg= 'black')
-
+            a = open((os.path.join(os.path.expanduser("~"), ".passrack", ".data_encr.dat")), 'r')
+            b = a.readlines()
+            for line in b:
+                c = line
+            
+                dmsg = cryptocode.decrypt(c, cek)
+                ccd = getTranslatedMessage('d', dmsg, cck) 
+            
+                secho(ccd, fg='cyan', bg = "black")
+        else:
+            secho('Invalid Password', fg='red', bg= 'black')
+    except FileNotFoundError as e:
+        click.secho('Please run prack init to set up passrack for your use')
 '''
 ================================================================================================
 ================================================================================================
@@ -224,11 +227,11 @@ def init():
 @click.option('--password', '-ps')
 def config(password):
     cek = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".key.dat")), 'rb'))
-    inp = click.prompt(click.style('Enter your old password', fg='blue'), confirmation_prompt=True)
+    inp = click.prompt(click.style('Enter your old password', fg='cyan', bg = "black"),hide_input=True, confirmation_prompt=True)
     ops = pickle.load(open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'rb'))
     ops = cryptocode.decrypt(ops, cek)
     if inp==ops:
-        passcode = click.prompt(click.style('Enter new password', fg='blue'), confirmation_prompt=True)
+        passcode = click.prompt(click.style('Enter new password', fg='cyan', bg = "black"), hide_input=True, confirmation_prompt=True)
         password= cryptocode.encrypt(passcode, cek)
         pickle.dump(password, open((os.path.join(os.path.expanduser("~"), ".passrack", ".passrack.dat")), 'wb'))
     else:
