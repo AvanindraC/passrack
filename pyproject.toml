@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "passrack"
-version = "0.1.2"
-description = "A Command Line Interface to encrypt, decrypt and save passwords"
+version = "0.1.6"
+description = "A Command Line Interface to encrypt, decrypt and save passwords. What's new: More exception handling"
 authors = ["Avanindra Chakraborty <avanindra.d2.chakraborty@gmail.com>", Arghya Sarkar <arghyasarkar.nolan@gmail.com>]
 license = "MIT"
 readme="README.md"
