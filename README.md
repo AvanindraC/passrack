@@ -5,9 +5,17 @@ Have important passwords to store? Use passrack to encrypt your passwords into f
 
 ## Install
 
+### Linux 
+
 ```
 pip3 install passrack 
 ```
+Arch based -
+```yay -S passrack```
+
+### Windows
+
+```pip install passrack```
 
 ## Dependencies
 + `click` 
